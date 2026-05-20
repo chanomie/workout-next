@@ -37,30 +37,30 @@ export default function Home() {
     <main>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
         <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '3rem', letterSpacing: '-0.02em' }}>Workout Next</h1>
+          <h1 style={{ fontSize: '3rem', letterSpacing: '-0.02em' }}>Workout.Next</h1>
           <p>Your personal 25-minute trainer.</p>
         </div>
         
-        <div style={{ display: 'grid', gap: '1rem', textAlign: 'left', background: '#f9f9f9', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem' }}>
+        <div style={{ display: 'grid', gap: '1rem', textAlign: 'left', background: 'var(--card-bg)', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem', border: '1px solid var(--card-bg)' }}>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <span style={{ fontSize: '1.5rem' }}>🧘</span>
             <div>
               <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>5 Warm-up Stretches</p>
-              <p style={{ fontSize: '0.85rem' }}>Get your body ready.</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--secondary)' }}>Get your body ready.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <span style={{ fontSize: '1.5rem' }}>⚡</span>
             <div>
               <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>High Intensity Blocks</p>
-              <p style={{ fontSize: '0.85rem' }}>Recurring exercises with rest.</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--secondary)' }}>Recurring exercises with rest.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <span style={{ fontSize: '1.5rem' }}>❄️</span>
             <div>
               <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>5 Cool-down Stretches</p>
-              <p style={{ fontSize: '0.85rem' }}>Recover and relax.</p>
+              <p style={{ fontSize: '0.85rem', color: 'var(--secondary)' }}>Recover and relax.</p>
             </div>
           </div>
         </div>

@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Workout Next",
+  title: "Workout.Next",
   description: "Automated 25-minute workout generator and tracker",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Workout Next",
+    title: "Workout.Next",
   },
 };
 

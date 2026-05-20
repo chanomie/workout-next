@@ -48,13 +48,13 @@ export default function ExerciseManagement() {
         <h1 style={{ fontSize: '1.5rem' }}>Manage Exercises</h1>
       </div>
 
-      <div style={{ background: '#f9f9f9', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Add New Move</h3>
+      <div style={{ background: 'var(--card-bg)', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem', border: '1px solid var(--card-bg)' }}>
+        <h3 style={{ marginBottom: '1rem', fontSize: '1rem', color: 'var(--foreground)' }}>Add New Move</h3>
         <input 
           value={newName} 
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Exercise name (e.g. Jumping Jacks)"
-          style={{ width: '100%', padding: '0.85rem', borderRadius: '12px', border: '1px solid #ddd', marginBottom: '1rem', fontSize: '1rem' }}
+          style={{ width: '100%', padding: '0.85rem', borderRadius: '12px', border: '1px solid #ddd', marginBottom: '1rem', fontSize: '1rem', background: 'var(--background)', color: 'var(--foreground)' }}
         />
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
           {(['warmup', 'workout', 'cooldown'] as const).map((type) => (
@@ -65,7 +65,7 @@ export default function ExerciseManagement() {
                 flex: 1, 
                 padding: '0.5rem', 
                 fontSize: '0.75rem', 
-                background: newType === type ? 'var(--foreground)' : '#fff',
+                background: newType === type ? 'var(--foreground)' : 'var(--background)',
                 color: newType === type ? 'var(--background)' : 'var(--foreground)',
                 border: '1px solid #ddd'
               }}
@@ -85,7 +85,7 @@ export default function ExerciseManagement() {
             </h2>
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {exercises.filter(e => e.type === type).map(e => (
-                <div key={e.id} style={{ padding: '1rem', background: '#fff', border: '1px solid #eee', borderRadius: '12px', fontSize: '0.9rem' }}>
+                <div key={e.id} style={{ padding: '1rem', background: 'var(--card-bg)', border: '1px solid var(--card-bg)', borderRadius: '12px', fontSize: '0.9rem', color: 'var(--foreground)' }}>
                   {e.name}
                 </div>
               ))}

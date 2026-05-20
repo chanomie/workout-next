@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { WorkoutSession } from '@/types/workout';
 import { Timer } from './Timer';
 
@@ -13,15 +13,58 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  
   const currentStep = session.steps[currentStepIndex];
   const nextStep = session.steps[currentStepIndex + 1];
+
+  // Initialize audio context on first user interaction or mount
+  const getAudioContext = () => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
+
+  const playDing = () => {
+    try {
+      const ctx = getAudioContext();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+      
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.1);
+    } catch (e) {
+      console.error('Audio playback failed:', e);
+    }
+  };
 
   useEffect(() => {
     if (isPaused || isComplete) return;
 
     const interval = setInterval(() => {
       setRemainingTime((prev) => {
-        if (prev <= 1) {
+        const nextTime = prev - 1;
+        
+        // Ding at 5, 4, 3, 2, 1
+        if (nextTime <= 5 && nextTime >= 1) {
+          playDing();
+        }
+
+        if (nextTime <= 0) {
           if (currentStepIndex < session.steps.length - 1) {
             const nextIndex = currentStepIndex + 1;
             setCurrentStepIndex(nextIndex);
@@ -32,12 +75,17 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
             return 0;
           }
         }
-        return prev - 1;
+        return nextTime;
       });
     }, 1000);
 
     return () => clearInterval(interval);
   }, [currentStepIndex, isPaused, isComplete, session.steps]);
+
+  // Try to resume audio context on any click within the player
+  const handleInteraction = () => {
+    getAudioContext();
+  };
 
   const progress = ((currentStepIndex + (isComplete ? 1 : 0)) / session.steps.length) * 100;
 
@@ -52,9 +100,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div onClick={handleInteraction} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <button onClick={onExit} style={{ padding: '0.5rem 0', background: 'none', color: 'var(--secondary)', fontSize: '0.9rem' }}>✕ Exit</button>
+        <button onClick={() => { handleInteraction(); onExit(); }} style={{ padding: '0.5rem 0', background: 'none', color: 'var(--secondary)', fontSize: '0.9rem' }}>✕ Exit</button>
         <div style={{ fontSize: '0.9rem', color: 'var(--secondary)', fontWeight: '500' }}>
           {currentStepIndex + 1} / {session.steps.length}
         </div>
@@ -76,7 +124,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
           }}>
             {currentStep.exercise.type}
           </p>
-          <h2 style={{ fontSize: '2.25rem', fontWeight: '800', lineHeight: '1.2' }}>{currentStep.exercise.name}</h2>
+          <h2 style={{ fontSize: '2.25rem', fontWeight: '800', lineHeight: '1.2', color: 'var(--foreground)' }}>{currentStep.exercise.name}</h2>
         </div>
 
         <Timer 
@@ -88,9 +136,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
           <div style={{ 
             marginTop: '2rem', 
             padding: '1rem', 
-            background: '#fafafa', 
+            background: 'var(--card-bg)', 
             borderRadius: '16px',
-            border: '1px solid #eee'
+            border: '1px solid var(--card-bg)'
           }}>
             <p style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--secondary)', marginBottom: '0.25rem' }}>NEXT UP</p>
             <p style={{ fontWeight: '600', color: 'var(--foreground)' }}>{nextStep.exercise.name}</p>
@@ -98,16 +146,16 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         )}
       </div>
 
-      <button 
-        onClick={() => setIsPaused(!isPaused)}
-        style={{ 
+          <button 
+          onClick={() => { handleInteraction(); setIsPaused(!isPaused); }}
+          style={{ 
           marginTop: '2rem', 
           background: isPaused ? 'var(--accent)' : 'var(--foreground)',
-          color: 'white'
-        }}
-      >
-        {isPaused ? 'Resume' : 'Pause'}
-      </button>
+          color: isPaused ? 'white' : 'var(--background)'
+          }}
+          >
+          {isPaused ? 'Resume' : 'Pause'}
+          </button>
     </div>
   );
 };
