@@ -52,6 +52,28 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     }
   };
 
+  const speakName = (name: string) => {
+    if (!window.speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(name);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Announce name whenever the step changes
+  useEffect(() => {
+    if (isComplete) return;
+    
+    // We add a slight delay or wait for the user to be active to ensure speech isn't blocked
+    // Most browsers allow speech if a previous interaction has occurred.
+    speakName(currentStep.exercise.name);
+  }, [currentStepIndex, isComplete]);
+
   useEffect(() => {
     if (isPaused || isComplete) return;
 
