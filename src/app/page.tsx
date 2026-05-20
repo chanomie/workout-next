@@ -1,66 +1,78 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState } from 'react';
+import { generateWorkout } from '@/lib/workout-engine';
+import { WorkoutSession } from '@/types/workout';
+import { WorkoutPlayer } from '@/components/WorkoutPlayer';
+import { storage } from '@/lib/storage';
+import { warmUpExercises, workoutExercises, coolDownExercises } from '@/data/exercises';
+import Link from 'next/link';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+  const [session, setSession] = useState<WorkoutSession | null>(null);
+
+  const handleStartWorkout = () => {
+    const saved = storage.getExercises();
+    const wu = saved?.filter(e => e.type === 'warmup') || warmUpExercises;
+    const wo = saved?.filter(e => e.type === 'workout') || workoutExercises;
+    const cd = saved?.filter(e => e.type === 'cooldown') || coolDownExercises;
+    
+    const newSession = generateWorkout(wu, wo, cd);
+    setSession(newSession);
+  };
+
+  const handleExit = () => {
+    setSession(null);
+  };
+
+  if (session) {
+    return (
+      <main>
+        <WorkoutPlayer session={session} onExit={handleExit} />
       </main>
-    </div>
+    );
+  }
+
+  return (
+    <main>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '3rem', letterSpacing: '-0.02em' }}>Workout Next</h1>
+          <p>Your personal 25-minute trainer.</p>
+        </div>
+        
+        <div style={{ display: 'grid', gap: '1rem', textAlign: 'left', background: '#f9f9f9', padding: '1.5rem', borderRadius: '20px', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🧘</span>
+            <div>
+              <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>5 Warm-up Stretches</p>
+              <p style={{ fontSize: '0.85rem' }}>Get your body ready.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>⚡</span>
+            <div>
+              <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>High Intensity Blocks</p>
+              <p style={{ fontSize: '0.85rem' }}>Recurring exercises with rest.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>❄️</span>
+            <div>
+              <p style={{ fontWeight: '700', color: 'var(--foreground)' }}>5 Cool-down Stretches</p>
+              <p style={{ fontSize: '0.85rem' }}>Recover and relax.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button onClick={handleStartWorkout} style={{ width: '100%', height: '4rem', fontSize: '1.2rem', marginBottom: '1rem' }}>
+        Start Workout
+      </button>
+
+      <Link href="/exercises" style={{ textAlign: 'center', color: 'var(--secondary)', fontSize: '0.9rem', textDecoration: 'none' }}>
+        Manage Exercises
+      </Link>
+    </main>
   );
 }
