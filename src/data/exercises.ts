@@ -1,20 +1,20 @@
 import { Exercise } from '@/types/workout';
 
 export const warmUpExercises: Exercise[] = [
-  { id: 'wu1', name: 'Active Calf & Hamstring Stretch', type: 'warmup' },
-  { id: 'wu2', name: 'Chest Openers with Rotation', type: 'warmup' },
-  { id: 'wu3', name: 'Cross-Body Shoulder Stretch', type: 'warmup' },
-  { id: 'wu4', name: 'Deep Side to Side Lunge', type: 'warmup' },
-  { id: 'wu5', name: 'Dynamic Side Bends', type: 'warmup' },
-  { id: 'wu6', name: 'Elbor Rotations', type: 'warmup' },
-  { id: 'wu7', name: 'Full Lunge Leg Rolls', type: 'warmup' },
-  { id: 'wu8', name: 'Hip Flexor Stretch', type: 'warmup' },
-  { id: 'wu9', name: 'Lunge with Thoracic Rotation', type: 'warmup' },
-  { id: 'wu10', name: 'Roll Down', type: 'warmup' },
-  { id: 'wu11', name: 'Side Stretch', type: 'warmup' },
-  { id: 'wu12', name: 'Standing Hip Rotation', type: 'warmup' },
-  { id: 'wu13', name: 'Standing Overhead Lat Stretch', type: 'warmup' },
-  { id: 'wu14', name: 'Wrist Warm-Up', type: 'warmup' },
+  { id: 'wu1', name: 'Active Calf & Hamstring Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu2', name: 'Chest Openers with Rotation', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu3', name: 'Cross-Body Shoulder Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu4', name: 'Deep Side to Side Lunge', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu5', name: 'Dynamic Side Bends', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu6', name: 'Elbor Rotations', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu7', name: 'Full Lunge Leg Rolls', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu8', name: 'Hip Flexor Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu9', name: 'Lunge with Thoracic Rotation', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu10', name: 'Roll Down', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu11', name: 'Side Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu12', name: 'Standing Hip Rotation', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu13', name: 'Standing Overhead Lat Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu14', name: 'Wrist Warm-Up', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
 ];
 
 export const workoutExercises: Exercise[] = [

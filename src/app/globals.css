@@ -88,3 +88,21 @@ p {
   color: var(--secondary);
   line-height: 1.5;
 }
+
+/* Timer Specific Styles */
+.timer-track {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+.timer-progress {
+  stroke: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  .timer-track {
+    stroke: rgba(255, 255, 255, 0.15);
+  }
+  .timer-progress {
+    stroke: #ffffff;
+  }
+}

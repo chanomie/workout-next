@@ -4,6 +4,7 @@ export interface Exercise {
   id: string;
   name: string;
   type: Exclude<MoveType, 'rest'>;
+  image?: string;
 }
 
 export interface WorkoutStep {

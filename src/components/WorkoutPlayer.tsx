@@ -152,6 +152,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         <Timer 
           duration={currentStep.durationSeconds} 
           remainingTime={remainingTime} 
+          backgroundImage={'image' in currentStep.exercise ? currentStep.exercise.image : undefined}
         />
 
         {nextStep && (
