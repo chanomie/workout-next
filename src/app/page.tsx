@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { generateWorkout } from '@/lib/workout-engine';
-import { WorkoutSession } from '@/types/workout';
+import { WorkoutSession, Exercise } from '@/types/workout';
 import { WorkoutPlayer } from '@/components/WorkoutPlayer';
 import { storage } from '@/lib/storage';
 import { warmUpExercises, workoutExercises, coolDownExercises } from '@/data/exercises';
