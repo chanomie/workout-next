@@ -71,7 +71,10 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
 
   // Handle all speech announcements
   useEffect(() => {
-    if (isComplete) return;
+    if (isComplete) {
+      speak('Workout Complete');
+      return;
+    }
     
     if (isPrepPhase) {
       speak(currentStep.exercise.name);
@@ -133,10 +136,67 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
 
   if (isComplete) {
     return (
-      <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <h1>Workout Complete!</h1>
-        <p style={{ marginTop: '1rem' }}>Great job on finishing your 25-minute session.</p>
-        <button onClick={onExit} style={{ marginTop: '3rem' }}>Done</button>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Workout Complete!</h1>
+          <p style={{ color: 'var(--secondary)', fontWeight: '500' }}>Great job! Here is what you accomplished:</p>
+        </div>
+        
+        <div style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          padding: '0 0.5rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem'
+        }}>
+          {session.steps.filter(step => step.exercise.type !== 'rest').map((step, idx) => (
+            <div key={`${step.exercise.id}-${idx}`} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '1rem', 
+              padding: '1rem', 
+              background: 'var(--card-bg)', 
+              borderRadius: '16px',
+              border: '1px solid rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ 
+                width: 40, 
+                height: 40, 
+                borderRadius: '50%', 
+                background: 'var(--foreground)', 
+                color: 'var(--background)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.8rem',
+                fontWeight: '700',
+                flexShrink: 0
+              }}>
+                {idx + 1}
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ 
+                  fontSize: '0.65rem', 
+                  fontWeight: '700', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.1em',
+                  color: 'var(--accent)',
+                  margin: 0
+                }}>
+                  {step.exercise.type}
+                </p>
+                <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: '600' }}>{step.exercise.name}</h3>
+              </div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--secondary)', fontWeight: '600' }}>
+                {step.durationSeconds}s
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={onExit} style={{ width: '100%', padding: '1.25rem' }}>Done</button>
       </div>
     );
   }
