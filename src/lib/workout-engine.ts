@@ -44,12 +44,15 @@ export function generateWorkout(
     blockExercises.forEach((exercise) => {
       steps.push({ exercise, durationSeconds: STEP_DURATION });
     });
-    // Rest
-    steps.push({ exercise: { name: 'Rest', type: 'rest', id: 'rest' }, durationSeconds: STEP_DURATION });
 
     currentTotalSeconds = steps.reduce((sum, step) => sum + step.durationSeconds, 0);
 
-    // If adding another block would push us too far past 22 minutes, we could stop.
+    // Only add a rest if we haven't reached the target and are likely to add another block
+    if (currentTotalSeconds < targetWorkoutSeconds) {
+      steps.push({ exercise: { name: 'Rest', type: 'rest', id: 'rest' }, durationSeconds: STEP_DURATION });
+      currentTotalSeconds += STEP_DURATION;
+    }
+
     // The current loop will stop as soon as we hit or pass 22 minutes.
     if (currentTotalSeconds >= targetWorkoutSeconds) break;
   }
