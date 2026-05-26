@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { WorkoutSession } from '@/types/workout';
 import { Timer } from './Timer';
 
@@ -9,7 +9,10 @@ interface WorkoutPlayerProps {
 
 export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [remainingTime, setRemainingTime] = useState(session.steps[0].durationSeconds);
+  const [isPrepPhase, setIsPrepPhase] = useState(session.steps[0].exercise.id !== 'rest');
+  const [remainingTime, setRemainingTime] = useState(
+    session.steps[0].exercise.id !== 'rest' ? 5 : session.steps[0].durationSeconds
+  );
   const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   
@@ -18,18 +21,32 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   const currentStep = session.steps[currentStepIndex];
   const nextStep = session.steps[currentStepIndex + 1];
 
+  const speak = useCallback((text: string) => {
+    if (!window.speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
   // Initialize audio context on first user interaction or mount
-  const getAudioContext = () => {
+  const getAudioContext = useCallback(() => {
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtxRef.current = new AudioContextClass();
     }
     if (audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
     }
     return audioCtxRef.current;
-  };
+  }, []);
 
-  const playDing = () => {
+  const playDing = useCallback(() => {
     try {
       const ctx = getAudioContext();
       const oscillator = ctx.createOscillator();
@@ -50,59 +67,62 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     } catch (e) {
       console.error('Audio playback failed:', e);
     }
-  };
+  }, [getAudioContext]);
 
-  const speakName = (name: string) => {
-    if (!window.speechSynthesis) return;
-    
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(name);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Announce name whenever the step changes
+  // Handle all speech announcements
   useEffect(() => {
     if (isComplete) return;
     
-    // We add a slight delay or wait for the user to be active to ensure speech isn't blocked
-    // Most browsers allow speech if a previous interaction has occurred.
-    speakName(currentStep.exercise.name);
-  }, [currentStepIndex, isComplete]);
+    if (isPrepPhase) {
+      speak(currentStep.exercise.name);
+    } else {
+      if (currentStep.exercise.id === 'rest') {
+        speak('Rest');
+      } else {
+        speak('Go');
+      }
+    }
+  }, [currentStepIndex, isPrepPhase, isComplete, speak, currentStep.exercise.name, currentStep.exercise.id]);
 
   useEffect(() => {
     if (isPaused || isComplete) return;
 
     const interval = setInterval(() => {
       setRemainingTime((prev) => {
-        const nextTime = prev - 1;
-        
-        // Ding at 5, 4, 3, 2, 1
-        if (nextTime <= 5 && nextTime >= 1) {
-          playDing();
+        if (prev > 1) {
+          const nextTime = prev - 1;
+          
+          // Ding at 5, 4, 3, 2, 1 for the main exercise
+          if (!isPrepPhase && nextTime <= 5) {
+            playDing();
+          }
+          return nextTime;
         }
 
-        if (nextTime <= 0) {
+        // Timer reached 1 and is about to reach 0
+        if (isPrepPhase) {
+          setIsPrepPhase(false);
+          return session.steps[currentStepIndex].durationSeconds;
+        } else {
           if (currentStepIndex < session.steps.length - 1) {
-            const nextIndex = currentStepIndex + 1;
-            setCurrentStepIndex(nextIndex);
-            return session.steps[nextIndex].durationSeconds;
+            const nextIdx = currentStepIndex + 1;
+            const nextStepData = session.steps[nextIdx];
+            
+            setCurrentStepIndex(nextIdx);
+            const isNextPrep = nextStepData.exercise.id !== 'rest';
+            setIsPrepPhase(isNextPrep);
+            
+            return isNextPrep ? 5 : nextStepData.durationSeconds;
           } else {
             setIsComplete(true);
-            clearInterval(interval);
             return 0;
           }
         }
-        return nextTime;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentStepIndex, isPaused, isComplete, session.steps]);
+  }, [currentStepIndex, isPaused, isComplete, session.steps, isPrepPhase, playDing]);
 
   // Try to resume audio context on any click within the player
   const handleInteraction = () => {
@@ -141,16 +161,16 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
             letterSpacing: '0.15em', 
             fontSize: '0.75rem', 
             fontWeight: '700',
-            color: 'var(--secondary)',
+            color: isPrepPhase ? 'var(--accent)' : 'var(--secondary)',
             marginBottom: '0.5rem'
           }}>
-            {currentStep.exercise.type}
+            {isPrepPhase ? 'Prepare' : currentStep.exercise.type}
           </p>
           <h2 style={{ fontSize: '2.25rem', fontWeight: '800', lineHeight: '1.2', color: 'var(--foreground)' }}>{currentStep.exercise.name}</h2>
         </div>
 
         <Timer 
-          duration={currentStep.durationSeconds} 
+          duration={isPrepPhase ? 5 : currentStep.durationSeconds} 
           remainingTime={remainingTime} 
           backgroundImage={'image' in currentStep.exercise ? currentStep.exercise.image : undefined}
         />
