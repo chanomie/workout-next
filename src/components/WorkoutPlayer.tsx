@@ -127,6 +127,26 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     return () => clearInterval(interval);
   }, [currentStepIndex, isPaused, isComplete, session.steps, isPrepPhase, playDing]);
 
+  // Set data-phase attribute on the main element to enable phase-specific styling
+  useEffect(() => {
+    const mainEl = document.querySelector('main');
+    if (!mainEl) return;
+
+    let phase = 'idle';
+    if (isComplete) {
+      phase = 'complete';
+    } else if (isPrepPhase) {
+      phase = 'prep';
+    } else {
+      phase = currentStep.exercise.type;
+    }
+
+    mainEl.setAttribute('data-phase', phase);
+    return () => {
+      mainEl.removeAttribute('data-phase');
+    };
+  }, [currentStep, isPrepPhase, isComplete]);
+
   // Try to resume audio context on any click within the player
   const handleInteraction = () => {
     getAudioContext();
@@ -159,14 +179,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
               padding: '1rem', 
               background: 'var(--card-bg)', 
               borderRadius: '16px',
-              border: '1px solid rgba(0,0,0,0.05)'
+              border: '1px solid var(--card-border)'
             }}>
               <div style={{ 
                 width: 40, 
                 height: 40, 
                 borderRadius: '50%', 
-                background: 'var(--foreground)', 
-                color: 'var(--background)',
+                background: 'var(--accent)', 
+                color: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -196,7 +216,18 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
           ))}
         </div>
 
-        <button onClick={onExit} style={{ width: '100%', padding: '1.25rem' }}>Done</button>
+        <button 
+          onClick={onExit} 
+          style={{ 
+            width: '100%', 
+            padding: '1.25rem',
+            background: 'var(--accent)',
+            color: 'white',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+          }}
+        >
+          Done
+        </button>
       </div>
     );
   }
@@ -210,8 +241,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         </div>
       </div>
 
-      <div style={{ height: 6, background: '#f0f0f0', borderRadius: 3, marginBottom: '2.5rem', overflow: 'hidden' }}>
-        <div style={{ width: `${progress}%`, height: '100%', background: 'var(--foreground)', transition: 'width 0.3s ease-out' }} />
+      <div style={{ height: 6, background: 'var(--timer-track-color)', borderRadius: 3, marginBottom: '2.5rem', overflow: 'hidden' }}>
+        <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s ease-out' }} />
       </div>
 
       <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -221,7 +252,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
             letterSpacing: '0.15em', 
             fontSize: '0.75rem', 
             fontWeight: '700',
-            color: isPrepPhase ? 'var(--accent)' : 'var(--secondary)',
+            color: 'var(--accent)',
             marginBottom: '0.5rem'
           }}>
             {isPrepPhase ? 'Prepare' : currentStep.exercise.type}
@@ -241,7 +272,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
             padding: '1rem', 
             background: 'var(--card-bg)', 
             borderRadius: '16px',
-            border: '1px solid var(--card-bg)'
+            border: '1px solid var(--card-border)'
           }}>
             <p style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--secondary)', marginBottom: '0.25rem' }}>NEXT UP</p>
             <p style={{ fontWeight: '600', color: 'var(--foreground)' }}>{nextStep.exercise.name}</p>
@@ -249,16 +280,18 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         )}
       </div>
 
-          <button 
-          onClick={() => { handleInteraction(); setIsPaused(!isPaused); }}
-          style={{ 
+      <button 
+        onClick={() => { handleInteraction(); setIsPaused(!isPaused); }}
+        style={{ 
           marginTop: '2rem', 
-          background: isPaused ? 'var(--accent)' : 'var(--foreground)',
-          color: isPaused ? 'white' : 'var(--background)'
-          }}
-          >
-          {isPaused ? 'Resume' : 'Pause'}
-          </button>
+          background: 'var(--accent)',
+          color: 'white',
+          opacity: isPaused ? 0.8 : 1,
+          boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+        }}
+      >
+        {isPaused ? 'Resume' : 'Pause'}
+      </button>
     </div>
   );
 };

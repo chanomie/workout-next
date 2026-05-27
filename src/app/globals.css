@@ -5,6 +5,8 @@
   --secondary: #666666;
   --accent: #0070f3;
   --card-bg: #f9f9f9;
+  --card-border: rgba(0, 0, 0, 0.05);
+  --timer-track-color: rgba(0, 0, 0, 0.1);
   --safe-area-inset-top: env(safe-area-inset-top);
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
 }
@@ -15,6 +17,98 @@
     --foreground: #ffffff;
     --secondary: #999999;
     --card-bg: #111111;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --timer-track-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Phase-specific theme overrides (Light Mode) */
+main[data-phase="prep"] {
+  --background: #fffdf0;
+  --accent: #d97706;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(217, 119, 6, 0.15);
+  --timer-track-color: rgba(217, 119, 6, 0.08);
+}
+main[data-phase="warmup"] {
+  --background: #fff8f2;
+  --accent: #ea580c;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(234, 88, 12, 0.15);
+  --timer-track-color: rgba(234, 88, 12, 0.08);
+}
+main[data-phase="workout"] {
+  --background: #faf5ff;
+  --accent: #7c3aed;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(124, 58, 237, 0.15);
+  --timer-track-color: rgba(124, 58, 237, 0.08);
+}
+main[data-phase="rest"] {
+  --background: #f0fdf4;
+  --accent: #16a34a;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(22, 163, 74, 0.15);
+  --timer-track-color: rgba(22, 163, 74, 0.08);
+}
+main[data-phase="cooldown"] {
+  --background: #f0f9ff;
+  --accent: #0284c7;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(2, 132, 199, 0.15);
+  --timer-track-color: rgba(2, 132, 199, 0.08);
+}
+main[data-phase="complete"] {
+  --background: #fdfcf7;
+  --accent: #b45309;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(180, 83, 9, 0.15);
+  --timer-track-color: rgba(180, 83, 9, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Phase-specific theme overrides (Dark Mode) */
+  main[data-phase="prep"] {
+    --background: #151105;
+    --accent: #fbbf24;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(251, 191, 36, 0.15);
+    --timer-track-color: rgba(251, 191, 36, 0.1);
+  }
+  main[data-phase="warmup"] {
+    --background: #160c04;
+    --accent: #f97316;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(249, 115, 22, 0.15);
+    --timer-track-color: rgba(249, 115, 22, 0.1);
+  }
+  main[data-phase="workout"] {
+    --background: #0d071b;
+    --accent: #a78bfa;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(167, 139, 250, 0.15);
+    --timer-track-color: rgba(167, 139, 250, 0.1);
+  }
+  main[data-phase="rest"] {
+    --background: #031109;
+    --accent: #34d399;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(52, 211, 153, 0.15);
+    --timer-track-color: rgba(52, 211, 153, 0.1);
+  }
+  main[data-phase="cooldown"] {
+    --background: #030f1b;
+    --accent: #38bdf8;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(56, 189, 248, 0.15);
+    --timer-track-color: rgba(56, 189, 248, 0.1);
+  }
+  main[data-phase="complete"] {
+    --background: #131105;
+    --accent: #fbbf24;
+    --card-bg: rgba(0, 0, 0, 0.3);
+    --card-border: rgba(251, 191, 36, 0.15);
+    --timer-track-color: rgba(251, 191, 36, 0.1);
   }
 }
 
@@ -55,6 +149,12 @@ main {
   padding: calc(var(--safe-area-inset-top) + 1rem) 1.5rem calc(var(--safe-area-inset-bottom) + 1rem) 1.5rem;
   display: flex;
   flex-direction: column;
+  transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Enable smooth background transitions for nested containers and cards */
+main, main *, button {
+  transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
 }
 
 button {
@@ -66,7 +166,6 @@ button {
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: opacity 0.2s;
 }
 
 button:active {
@@ -91,18 +190,11 @@ p {
 
 /* Timer Specific Styles */
 .timer-track {
-  stroke: rgba(0, 0, 0, 0.1);
+  stroke: var(--timer-track-color);
+  transition: stroke 0.5s ease;
 }
 
 .timer-progress {
-  stroke: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  .timer-track {
-    stroke: rgba(255, 255, 255, 0.15);
-  }
-  .timer-progress {
-    stroke: #ffffff;
-  }
+  stroke: var(--accent);
+  transition: stroke-dashoffset 0.1s linear, stroke 0.5s ease !important;
 }
