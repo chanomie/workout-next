@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   title: "Workout.Next",
   description: "Automated 25-minute workout generator and tracker",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: [
+      { url: "/icons/icon-180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
