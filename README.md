@@ -9,6 +9,8 @@
 - **Privacy First:** Data is stored locally in your browser; no sign-ups or cloud sync required.
 - **PWA Support:** Installable on mobile devices for a native-like experience.
 
+This application is built entirely using **Gemini** through an **agentic development process**, showcasing the power of AI-driven software engineering.
+
 ---
 
 ## 🚀 Live Demo
