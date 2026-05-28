@@ -9,6 +9,26 @@
 - **Privacy First:** Data is stored locally in your browser; no sign-ups or cloud sync required.
 - **PWA Support:** Installable on mobile devices for a native-like experience.
 
+## 🏋️ Workout Structure
+Each workout session is dynamically generated to provide a balanced and effective routine:
+
+### 1. Warm-up (2.5 Minutes)
+- **Selection:** 5 unique mobility exercises.
+- **Timing:** 30 seconds per exercise.
+
+### 2. Core Workout (~22 Minutes)
+The core phase is organized into repetitive blocks to build intensity:
+- **Block Logic:** Each block consists of 3 or 4 random exercises.
+- **Pattern:**
+  - **Round 1:** All exercises in the block (30s each).
+  - **Rest:** 30 seconds.
+  - **Round 2:** Repeat the same exercises (30s each).
+- **Transition:** 30-second rest between different blocks.
+
+### 3. Cool-down (2.5 Minutes)
+- **Selection:** 5 unique stretching exercises.
+- **Timing:** 30 seconds per exercise.
+
 This application is built entirely using **Gemini** through an **agentic development process**, showcasing the power of AI-driven software engineering.
 
 ---
