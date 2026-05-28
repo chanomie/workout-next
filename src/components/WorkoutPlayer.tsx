@@ -23,6 +23,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   const [isComplete, setIsComplete] = useState(false);
   const [totalElapsedSeconds, setTotalElapsedSeconds] = useState(0);
   const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
+  const [isAudioSuspended, setIsAudioSuspended] = useState(false);
   
   const audioCtxRef = useRef<AudioContext | null>(null);
   
@@ -47,6 +48,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       audioCtxRef.current = new AudioContextClass();
+      
+      // Update state when audio context changes state (e.g., suspended by browser)
+      audioCtxRef.current.onstatechange = () => {
+        setIsAudioSuspended(audioCtxRef.current?.state === 'suspended');
+      };
+      
+      // Set initial state
+      setIsAudioSuspended(audioCtxRef.current.state === 'suspended');
     }
     if (audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
@@ -57,6 +66,11 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   const playDing = useCallback(() => {
     try {
       const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        setIsAudioSuspended(true);
+        return;
+      }
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -289,8 +303,37 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         </div>
       </div>
 
-      <div style={{ height: 6, background: 'var(--timer-track-color)', borderRadius: 3, marginBottom: '2.5rem', overflow: 'hidden' }}>
-        <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s ease-out' }} />
+      <div style={{ position: 'relative' }}>
+        <div style={{ height: 6, background: 'var(--timer-track-color)', borderRadius: 3, marginBottom: '2.5rem', overflow: 'hidden' }}>
+          <div style={{ width: `${progress}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s ease-out' }} />
+        </div>
+
+        {isAudioSuspended && (
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleInteraction(); }}
+            style={{ 
+              position: 'absolute', 
+              top: '1.5rem', 
+              left: '50%', 
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              padding: '0.5rem 1rem',
+              background: '#ff9800',
+              color: 'white',
+              fontSize: '0.8rem',
+              fontWeight: '700',
+              borderRadius: '20px',
+              border: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            🔇 Tap to enable sound
+          </button>
+        )}
       </div>
 
       <div style={{ textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
