@@ -27,11 +27,16 @@ export function generateWorkout(
   // 2. Workout Blocks
   let currentTotalSeconds = steps.reduce((sum, step) => sum + step.durationSeconds, 0);
   const targetWorkoutSeconds = WORKOUT_TARGET_MINUTES * 60;
+  let availableWorkouts = [...workouts];
 
-  while (currentTotalSeconds < targetWorkoutSeconds) {
+  while (currentTotalSeconds < targetWorkoutSeconds && availableWorkouts.length > 0) {
     // Decide block size (3 or 4 exercises)
-    const blockSize = Math.random() > 0.5 ? 4 : 3;
-    const blockExercises = getRandomItems(workouts, blockSize);
+    const blockSize = Math.min(Math.random() > 0.5 ? 4 : 3, availableWorkouts.length);
+    const blockExercises = getRandomItems(availableWorkouts, blockSize);
+
+    // Remove selected exercises from available pool for subsequent blocks
+    const selectedIds = new Set(blockExercises.map(ex => ex.id));
+    availableWorkouts = availableWorkouts.filter(ex => !selectedIds.has(ex.id));
 
     // Round 1 of the block
     blockExercises.forEach((exercise) => {
@@ -48,7 +53,7 @@ export function generateWorkout(
     currentTotalSeconds = steps.reduce((sum, step) => sum + step.durationSeconds, 0);
 
     // Only add a rest if we haven't reached the target and are likely to add another block
-    if (currentTotalSeconds < targetWorkoutSeconds) {
+    if (currentTotalSeconds < targetWorkoutSeconds && availableWorkouts.length > 0) {
       steps.push({ exercise: { name: 'Rest', type: 'rest', id: 'rest' }, durationSeconds: STEP_DURATION });
       currentTotalSeconds += STEP_DURATION;
     }
