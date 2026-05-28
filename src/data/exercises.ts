@@ -1,13 +1,13 @@
 import { Exercise } from '@/types/workout';
 
 export const warmUpExercises: Exercise[] = [
-  { id: 'wu1', name: 'Active Calf & Hamstring Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu1', name: 'Active Calf & Hamstring Stretch', type: 'warmup', image: '/images/exercises/active-calf-and-hamstring-stretch.png' },
   { id: 'wu2', name: 'Chest Openers with Rotation', type: 'warmup', image: '/images/exercises/chest-openers.png' },
-  { id: 'wu3', name: 'Cross-Body Shoulder Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu3', name: 'Cross-Body Shoulder Stretch', type: 'warmup', image: '/images/exercises/cross-body-shoulder-stretch.png' },
   { id: 'wu4', name: 'Deep Side to Side Lunge', type: 'warmup', image: '/images/exercises/side-to-side-lunge.png' },
-  { id: 'wu5', name: 'Dynamic Side Bends', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
-  { id: 'wu6', name: 'Elbor Rotations', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
-  { id: 'wu7', name: 'Full Lunge Leg Rolls', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu5', name: 'Dynamic Side Bends', type: 'warmup', image: '/images/exercises/dynamic-side-bends.png' },
+  { id: 'wu6', name: 'Elbow Rotations', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
+  { id: 'wu7', name: 'Full Lunge Leg Rolls', type: 'warmup', image: '/images/exercises/full-lunge-leg-rolls.png' },
   { id: 'wu8', name: 'Hip Flexor Stretch', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
   { id: 'wu9', name: 'Lunge with Thoracic Rotation', type: 'warmup', image: '/images/exercises/warmup-generic.png' },
   { id: 'wu10', name: 'Roll Down', type: 'warmup', image: '/images/exercises/warmup-generic.png' },

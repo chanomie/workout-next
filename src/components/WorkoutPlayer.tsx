@@ -7,6 +7,12 @@ interface WorkoutPlayerProps {
   onExit: () => void;
 }
 
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
 export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPrepPhase, setIsPrepPhase] = useState(session.steps[0].exercise.id !== 'rest');
@@ -15,6 +21,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   );
   const [isPaused, setIsPaused] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [totalElapsedSeconds, setTotalElapsedSeconds] = useState(0);
+  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
   
   const audioCtxRef = useRef<AudioContext | null>(null);
   
@@ -91,6 +99,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     if (isPaused || isComplete) return;
 
     const interval = setInterval(() => {
+      setTotalElapsedSeconds((prev) => prev + 1);
       setRemainingTime((prev) => {
         if (prev > 1) {
           const nextTime = prev - 1;
@@ -152,6 +161,33 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     getAudioContext();
   };
 
+  const handleSkip = () => {
+    handleInteraction();
+    if (isComplete) return;
+
+    // Track skipped exercises (ignore rest steps)
+    if (currentStep.exercise.id !== 'rest') {
+      setSkippedSteps((prev) => {
+        const next = new Set(prev);
+        next.add(currentStepIndex);
+        return next;
+      });
+    }
+
+    if (currentStepIndex < session.steps.length - 1) {
+      const nextIdx = currentStepIndex + 1;
+      const nextStepData = session.steps[nextIdx];
+      
+      setCurrentStepIndex(nextIdx);
+      const isNextPrep = nextStepData.exercise.id !== 'rest';
+      setIsPrepPhase(isNextPrep);
+      setRemainingTime(isNextPrep ? 5 : nextStepData.durationSeconds);
+    } else {
+      setIsComplete(true);
+      setRemainingTime(0);
+    }
+  };
+
   const progress = ((currentStepIndex + (isComplete ? 1 : 0)) / session.steps.length) * 100;
 
   if (isComplete) {
@@ -160,6 +196,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         <div style={{ textAlign: 'center', padding: '2rem 0' }}>
           <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Workout Complete!</h1>
           <p style={{ color: 'var(--secondary)', fontWeight: '500' }}>Great job! Here is what you accomplished:</p>
+          <p style={{ color: 'var(--secondary)', fontWeight: '600', marginTop: '0.5rem', fontSize: '1.1rem' }}>
+            Total Time: <span style={{ color: 'var(--accent)', fontFamily: 'monospace', fontWeight: '700' }}>{formatTime(totalElapsedSeconds)}</span>
+          </p>
         </div>
         
         <div style={{ 
@@ -171,49 +210,55 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
           flexDirection: 'column',
           gap: '0.75rem'
         }}>
-          {session.steps.filter(step => step.exercise.type !== 'rest').map((step, idx) => (
-            <div key={`${step.exercise.id}-${idx}`} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '1rem', 
-              padding: '1rem', 
-              background: 'var(--card-bg)', 
-              borderRadius: '16px',
-              border: '1px solid var(--card-border)'
-            }}>
-              <div style={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: '50%', 
-                background: 'var(--accent)', 
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.8rem',
-                fontWeight: '700',
-                flexShrink: 0
+          {session.steps.map((step, originalIdx) => ({ step, originalIdx })).filter(({ step }) => step.exercise.type !== 'rest').map(({ step, originalIdx }, idx) => {
+            const isSkipped = skippedSteps.has(originalIdx);
+            return (
+              <div key={`${step.exercise.id}-${idx}`} style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1rem', 
+                padding: '1rem', 
+                background: 'var(--card-bg)', 
+                borderRadius: '16px',
+                border: '1px solid var(--card-border)',
+                opacity: isSkipped ? 0.6 : 1
               }}>
-                {idx + 1}
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ 
-                  fontSize: '0.65rem', 
-                  fontWeight: '700', 
-                  textTransform: 'uppercase', 
-                  letterSpacing: '0.1em',
-                  color: 'var(--accent)',
-                  margin: 0
+                <div style={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: '50%', 
+                  background: isSkipped ? 'var(--secondary)' : 'var(--accent)', 
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.8rem',
+                  fontWeight: '700',
+                  flexShrink: 0
                 }}>
-                  {step.exercise.type}
-                </p>
-                <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: '600' }}>{step.exercise.name}</h3>
+                  {idx + 1}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ 
+                    fontSize: '0.65rem', 
+                    fontWeight: '700', 
+                    textTransform: 'uppercase', 
+                    letterSpacing: '0.1em',
+                    color: isSkipped ? 'var(--secondary)' : 'var(--accent)',
+                    margin: 0
+                  }}>
+                    {step.exercise.type} {isSkipped && '• Skipped'}
+                  </p>
+                  <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: '600', textDecoration: isSkipped ? 'line-through' : 'none' }}>
+                    {step.exercise.name}
+                  </h3>
+                </div>
+                <div style={{ fontSize: '0.9rem', color: isSkipped ? '#ff4444' : 'var(--secondary)', fontWeight: '600' }}>
+                  {isSkipped ? 'Skipped' : `${step.durationSeconds}s`}
+                </div>
               </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--secondary)', fontWeight: '600' }}>
-                {step.durationSeconds}s
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <button 
@@ -236,6 +281,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     <div onClick={handleInteraction} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <button onClick={() => { handleInteraction(); onExit(); }} style={{ padding: '0.5rem 0', background: 'none', color: 'var(--secondary)', fontSize: '0.9rem' }}>✕ Exit</button>
+        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--foreground)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+          {formatTime(totalElapsedSeconds)}
+        </div>
         <div style={{ fontSize: '0.9rem', color: 'var(--secondary)', fontWeight: '500' }}>
           {currentStepIndex + 1} / {session.steps.length}
         </div>
@@ -291,6 +339,21 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
         }}
       >
         {isPaused ? 'Resume' : 'Pause'}
+      </button>
+
+      <button
+        onClick={handleSkip}
+        style={{
+          marginTop: '0.75rem',
+          background: 'none',
+          color: 'var(--secondary)',
+          border: '1px solid var(--card-border)',
+          padding: '0.75rem',
+          fontSize: '0.9rem',
+          borderRadius: '12px'
+        }}
+      >
+        Skip Step ➔
       </button>
     </div>
   );
