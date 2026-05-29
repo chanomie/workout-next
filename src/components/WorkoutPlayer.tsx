@@ -207,8 +207,37 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
     }
 
     mainEl.setAttribute('data-phase', phase);
+
+    // Update theme-color meta tag to match phase background
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const themeColors: Record<string, { light: string, dark: string }> = {
+      prep: { light: '#fffdf0', dark: '#151105' },
+      warmup: { light: '#fff8f2', dark: '#160c04' },
+      workout: { light: '#faf5ff', dark: '#0d071b' },
+      rest: { light: '#f0fdf4', dark: '#031109' },
+      cooldown: { light: '#f0f9ff', dark: '#030f1b' },
+      complete: { light: '#fdfcf7', dark: '#131105' },
+      idle: { light: '#ffffff', dark: '#000000' }
+    };
+
+    const currentColor = themeColors[phase] || themeColors.idle;
+    const color = isDarkMode ? currentColor.dark : currentColor.light;
+
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      (metaThemeColor as any).name = 'theme-color';
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', color);
+
     return () => {
       mainEl.removeAttribute('data-phase');
+      // Reset to default on unmount
+      const defaultColor = isDarkMode ? '#000000' : '#ffffff';
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', defaultColor);
+      }
     };
   }, [currentStep, isPrepPhase, isComplete]);
 
