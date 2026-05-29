@@ -2,9 +2,9 @@ import { Exercise, WorkoutSession, WorkoutStep, MoveType } from '@/types/workout
 import { warmUpExercises, workoutExercises, coolDownExercises } from '@/data/exercises';
 
 const STEP_DURATION = 30;
-const WARMUP_COUNT = 5;
-const COOLDOWN_COUNT = 5;
-const WORKOUT_TARGET_MINUTES = 22;
+const WARMUP_COUNT = 3;
+const COOLDOWN_COUNT = 3;
+const WORKOUT_TARGET_MINUTES = 18;
 
 function getRandomItems<T>(array: T[], count: number): T[] {
   const shuffled = [...array].sort(() => 0.5 - Math.random());
