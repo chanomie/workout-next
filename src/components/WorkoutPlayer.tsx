@@ -26,9 +26,51 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({ session, onExit })
   const [isAudioSuspended, setIsAudioSuspended] = useState(false);
   
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const wakeLockRef = useRef<any>(null);
   
   const currentStep = session.steps[currentStepIndex];
   const nextStep = session.steps[currentStepIndex + 1];
+
+  // Request wake lock to keep screen on while workout is active
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      // Only request if supported and workout is running (not complete, not paused)
+      if ('wakeLock' in navigator && !isComplete && !isPaused) {
+        try {
+          // Release existing lock if any
+          if (wakeLockRef.current) {
+            await wakeLockRef.current.release();
+          }
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        } catch (err) {
+          console.error(`Wake Lock error: ${err}`);
+        }
+      } else if (wakeLockRef.current) {
+        // Release lock if workout is complete or paused
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
+    };
+
+    requestWakeLock();
+
+    // Re-request wake lock when page becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
+    };
+  }, [isComplete, isPaused]);
 
   const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return;
